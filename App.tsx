@@ -8,14 +8,14 @@
  * @format
  */
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   ScrollView,
   View,
   Text,
-  StatusBar,
+  StatusBar, Button,
 } from 'react-native';
 
 import {
@@ -25,10 +25,45 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import nodejs from 'nodejs-mobile-react-native';
+
 
 declare const global: {HermesInternal: null | {}};
 
+class RGBNode {
+  constructor(callback: (msg: string) => void) {
+    nodejs.start("main.js");
+
+    nodejs.channel.addListener(
+        "message",
+        (msg) => {
+          console.log("From node: " + msg);
+          callback(msg);
+        },
+        this
+    );
+  }
+
+  doTheThing() {
+    nodejs.channel.send('main')
+  }
+}
+
+let rgb: RGBNode;
+
 const App = () => {
+  const [message, setMessage] = useState('');
+
+  const onUpdate = (msg: string) => {
+    setMessage(msg);
+  }
+
+  useEffect(() => {
+    if (!rgb) {
+      rgb = new RGBNode(onUpdate);
+    }
+  }, []);
+
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -43,32 +78,12 @@ const App = () => {
             </View>
           )}
           <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
+            <Button title={"Do the thing"} onPress={() => {
+              console.log("Thing done")
+              rgb.doTheThing();
+            }}/>
+
+            <Text>{message}</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
