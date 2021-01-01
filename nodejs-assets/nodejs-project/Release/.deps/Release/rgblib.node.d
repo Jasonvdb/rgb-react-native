@@ -1,0 +1,1 @@
+cmd_Release/rgblib.node := c++ -bundle -undefined dynamic_lookup -Wl,-no_pie -Wl,-search_paths_first -mmacosx-version-min=10.7 -arch x86_64 -L./Release -stdlib=libc++  -o Release/rgblib.node Release/obj.target/rgblib/swig_wrap.o -L/Users/jason/Documents/Repositories/rgb-sdk/bindings/npm/../../librgb/target/release -lrgb
